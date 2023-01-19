@@ -15,15 +15,17 @@ las_scott<-read.csv("data/Lasioglossums_5202020.csv", header=T)
 
 #Drop Lasioglossum sp. from vane trap and bowl trap
 bee_drop<-bee_sp %>%
-          filter(!(Genus== "Lasioglossum" & Trap_Type=="BT"|"Lasioglossum" & Trap_Type=="VT"))
-
-data()
+          filter(!(Genus== "Lasioglossum" & Trap_Type=="BT"|Genus=="Lasioglossum" & Trap_Type=="VT"))
 
 
+#make a new month column from sample data
 dd<-las_scott%>%
-               mutate(Month=str_extract( Date,"[A-z]+"))
+    mutate(Month=str_extract( Date,"[A-z]+"))
 
-mutate(new_col = stringr::str_extract(peak_name, "^.*(?=_peak)"))
+#replace motn abbreviations with full month name
+vec<-unique(dd$Month)
+
+str_replace_all(dd$Month, c("Mar"="March","May"="May", "Apr"="April", "Jul"="July", "Jun"="June", "Sep"="September",  "Aug"= "August", "Oct"="October" ,"Nov"="November"))
 
 JobDF %>% 
   mutate(inNameDF = ifelse(str_detect(occupation, paste0(NameDF$names, collapse = "|")),"yes","no"))
