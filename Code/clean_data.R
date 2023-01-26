@@ -19,13 +19,15 @@ bee_drop<-bee_sp %>%
 
 
 #make a new month column from sample data
-dd<-las_scott%>%
-    mutate(Month=str_extract( Date,"[A-z]+"))
+las_scott_mon<-las_scott%>%
+    mutate(Mon=str_extract( Date,"[A-z]+"))%>%
+    mutate(Month=str_replace_all(dd$Month, c("Mar"="March","May"="May", "Apr"="April", "Jul"="July", "Jun"="June", "Sep"="September",  "Aug"= "August", "Oct"="October" ,"Nov"="November")))%>%
+    select(-Mon)
 
-#replace motn abbreviations with full month name
-vec<-unique(dd$Month)
+#take all singletons out
+las_sing<-las_scott_mon%>%
+          filter(extra.count==0)
 
-str_replace_all(dd$Month, c("Mar"="March","May"="May", "Apr"="April", "Jul"="July", "Jun"="June", "Sep"="September",  "Aug"= "August", "Oct"="October" ,"Nov"="November"))
-
+#deal with multiples
 JobDF %>% 
   mutate(inNameDF = ifelse(str_detect(occupation, paste0(NameDF$names, collapse = "|")),"yes","no"))
