@@ -2,12 +2,11 @@
 library(dplyr)
 library(tidyverse)
 library(stringr)
+
 #Data
 #bee data with Lasioglossum as sp. for bowl traps (bt) and vane traps (VT)
 bee_sp<-read.csv("data/dataBee.csv", header = T, row=1)#
 
-#Lasioglossum species designations
-lassio_sp<-read.csv("data/Lassioglossum_species.csv", header=T)
 
 #identification of Lasioglossum to species by Scott Gibb
 las_scott<-read.csv("data/Lasioglossums_5202020.csv", header=T)
@@ -21,7 +20,6 @@ bee_drop<-bee_sp %>%
           mutate(across(c("Site","Plot_Month","Plot"), str_replace, 'WIS', 'WS'))
   
 
-         
 #make a new month column from sample data
 las_scott_mon<-las_scott%>%
                mutate(Mon=str_extract( Date,"[A-z]+"))%>%
