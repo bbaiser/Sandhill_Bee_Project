@@ -43,3 +43,20 @@ las_ind<-las_scott_mon%>%
          select(-Species)%>%
          rename(Species=Species2)
 
+
+#add Lasioglossum sp. from vane trap and bowl trap back 
+full_bee<-las_ind%>%
+          bind_rows(bee_drop)%>%
+          mutate(across("Species", str_replace, 'Lasioglossum alachuense|Lasioglossum apopkense', 'Lasioglossum sp'))
+
+
+#look for errors
+unique(full_bee$Site)
+unique(full_bee$Trap_Type)
+unique(full_bee$Genus)
+sort(unlist(unique(full_bee$Genus)))
+unique(full_bee$Month)
+unique(full_bee$Plot_Month)
+unique(full_bee$Species)
+sort(unlist(unique(full_bee$Species)))
+unique(full_bee$Plot)
