@@ -65,13 +65,20 @@ bee_count<-full_bee%>%
           group_by(Plot_Month, Species,Genus,Month, Site, Plot) %>% 
           tally()
 
-
+#environmental data
 env<-read.csv("data/ExplanatoryVariables.csv",row=1)%>%
      rename(Plot=Plot_Code)%>%
      mutate(across(c("Site","Plot"), str_replace, 'WIN', 'WN'))%>%#fix site names
      mutate(across(c("Site","Plot"), str_replace, 'WIS', 'WS'))#fix site names
+    
+
+#combine env and species data
+sandhill_bee<-env%>%
+              left_join(.,bee_count,c("Plot","Site"))
 
 
+#export clean data
+write.csv(sandhill_bee, "data/sandhill_bee.csv")
 
 #look for errors
 unique(bee_count$Site)
