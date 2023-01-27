@@ -22,7 +22,7 @@ bee_drop<-bee_sp %>%
 #make a new month column from sample data
 las_scott_mon<-las_scott%>%
                mutate(Mon=str_extract( Date,"[A-z]+"))%>%
-               mutate(Month=str_replace_all(dd$Month, c("Mar"="March","May"="May", "Apr"="April", "Jul"="July", "Jun"="June", "Sep"="September",  "Aug"= "August", "Oct"="October" ,"Nov"="November")))%>%
+               mutate(Month=str_replace_all(Mon, c("Mar"="March","May"="May", "Apr"="April", "Jul"="July", "Jun"="June", "Sep"="September",  "Aug"= "August", "Oct"="October" ,"Nov"="November")))%>%
                select(-Mon)
 
 #take all singletons out
@@ -47,16 +47,24 @@ las_ind<-las_scott_mon%>%
 #add Lasioglossum sp. from vane trap and bowl trap back 
 full_bee<-las_ind%>%
           bind_rows(bee_drop)%>%
-          mutate(across("Species", str_replace, 'Lasioglossum alachuense|Lasioglossum apopkense', 'Lasioglossum sp'))
-
-
+          mutate(across("Species", str_replace, 'Lasioglossum alachuense|Lasioglossum apopkense', 'Lasioglossum sp'))%>%
+          mutate(across("Site", str_replace, 'WCN|WIN', 'WN'))%>%#fix site names
+          mutate(across("Site", str_replace, 'WCS|WIS', 'WS'))%>%#fix site names
+          mutate(across("Trap_Type", str_replace, 'BR', 'BT'))%>%#fix site names
+          filter(!Species == "Perdita sp")# remove unknown perdita sp 
+         
+#get species specific counts for each plot/month combo
+bee_count<-full_bee%>%
+          group_by(Plot_Month, Species,Genus,Month, Site, Plot) %>% 
+          tally()
+                 
 #look for errors
-unique(full_bee$Site)
-unique(full_bee$Trap_Type)
-unique(full_bee$Genus)
-sort(unlist(unique(full_bee$Genus)))
-unique(full_bee$Month)
-unique(full_bee$Plot_Month)
-unique(full_bee$Species)
-sort(unlist(unique(full_bee$Species)))
-unique(full_bee$Plot)
+unique(bee_count$Site)
+unique(bee_count$Trap_Type)
+unique(bee_count$Genus)
+sort(unlist(unique(bee_count$Genus)))
+unique(bee_count$Month)
+unique(bee_count$Plot_Month)
+unique(bee_count$Species)
+length(sort(unlist(unique(bee_count$Species))))
+unique(bee_count$Plot)
