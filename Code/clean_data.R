@@ -66,7 +66,10 @@ bee_count<-full_bee%>%
           tally()
 
 
-env<-read.csv("data/ExplanatoryVariables.csv",row=1)                
+env<-read.csv("data/ExplanatoryVariables.csv",row=1)%>%
+     rename(Plot=Plot_Code)%>%
+     mutate(across(c("Site","Plot"), str_replace, 'WIN', 'WN'))%>%#fix site names
+     mutate(across(c("Site","Plot"), str_replace, 'WIS', 'WS'))#fix site names
 
 
 
