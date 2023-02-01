@@ -54,10 +54,15 @@ full_bee<-las_ind%>%
           bind_rows(bee_drop)%>%
           mutate(across("Species", str_replace, 'Lasioglossum alachuense|Lasioglossum apopkense', 'Lasioglossum sp'))%>%
           mutate(across("Trap_Type", str_replace, 'BR', 'BT'))%>%#fix Trap type names
+          mutate(across("Species", str_replace, 'Agapostemon sericeous', 'Agapostemon sericeus'))%>%#misspelled duplicate
+          mutate(across("Species", str_replace, 'Colletes thysenellae', 'Colletes thysanellae'))%>%#misspelled
+          mutate(across("Species", str_replace, 'Augochloropsis sumptuosa|Augochloropsis metallica|Augochloropsis anonyma', 'Augochloropsis sp'))%>% #lump to genus per Zach Portman
+          mutate(across("Species", str_replace, 'Augochlorella gratiosa|Augochlorella aurata', 'Augochlorella sp'))%>% #lump to genus per Zach Portman
           #select(-Plot_Month)%>% #remove old plot month combos with incorrect abbreviations 
           #mutate(Plot_Month = paste(Plot, Month, sep = '_'))%>%#make correct plot/month combo
-          filter(!Species == "Perdita sp")# remove unknown perdita sp 
-         
+          filter(!Species %in%  c("Perdita sp","Hylaeus affinis", "Hoplitis spoliata","Nomada miniata","Melissodes fimbriatus","Melissodes fumosus"))#drop perdita sp. (unk) and specie that wopuld be state records per rachel
+                 
+  
 #get species specific counts for each plot/month combo
 bee_count<-full_bee%>%
           group_by(Plot_Month, Species,Genus,Month, Site, Plot) %>% 
