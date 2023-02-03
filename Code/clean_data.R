@@ -9,7 +9,7 @@ bee_sp<-read.csv("data/dataBee.csv", header = T, row=1)#
 
 
 #identification of Lasioglossum to species by Scott Gibb
-las_scott<-read.csv("data/Lasioglossums_5202020.csv", header=T)
+las_scott<-read.csv("data/Lasioglossums_5202020.csv", header=T) 
 
 
 #Drop Lasioglossum sp. from vane trap and bowl trap
@@ -28,7 +28,8 @@ las_scott_mon<-las_scott%>%
                mutate(across("Site", str_replace, 'WCN', 'WN'))%>%#fix site names
                mutate(across("Site", str_replace, 'WCS', 'WS'))%>%#fix site names
                mutate(across("Site", str_replace, 'JF', 'JE'))%>%#fix site names
-               mutate(across("Site", str_replace, 'OS', 'OR'))#fix site names
+               mutate(across("Site", str_replace, 'OS', 'OR'))%>%#fix site names
+               filter(!Month=="November")#filter out november samples because we have no plant data. these were cherice data
 
 #take all singletons out
 las_sing<-las_scott_mon%>%
@@ -66,18 +67,23 @@ full_bee<-las_ind%>%
 #get species specific counts for each plot/month combo
 bee_count<-full_bee%>%
           group_by(Plot_Month, Species,Genus,Month, Site, Plot) %>% 
-          tally()
-
+          tally()%>%
+          filter(!Plot_Month=="BC3_June")
 #environmental data
-env<-read.csv("data/ExplanatoryVariables.csv",row=1)%>%
+env<-read.csv("data/ExplanatoryVariables.csv",row=1)%>%#site level env. vars
      rename(Plot=Plot_Code)%>%
      mutate(across(c("Site","Plot"), str_replace, 'WIN', 'WN'))%>%#fix site names
      mutate(across(c("Site","Plot"), str_replace, 'WIS', 'WS'))#fix site names
-    
+
+
+env_month<-read.csv("data/PlantVariables_Monthly.csv")%>%#monthly env. vars
+           rename(Plot_Month=X)
+           
 
 #combine env and species data
 sandhill_bee<-env%>%
-              left_join(.,bee_count,c("Plot","Site"))
+              left_join(.,bee_count,c("Plot","Site"))%>%
+              left_join(.,env_month,"Plot_Month")
 
 
 #export clean data
@@ -92,4 +98,8 @@ unique(bee_count$Month)
 unique(bee_count$Plot_Month)
 unique(bee_count$Species)
 length(sort(unlist(unique(bee_count$Species))))
-unique(bee_count$Plot)
+ve<-unique(env_month$Plot_Month)
+unique(dd$X)
+be<-unique(bee_count$Plot_Month)
+
+setdiff(be,ve)
