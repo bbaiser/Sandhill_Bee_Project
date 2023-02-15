@@ -7,22 +7,67 @@ library(lmerTest)
 library(glmmTMB)
 library(DHARMa)
 library(ggplot2)
+install.packages("MuMIn")
 library(MuMIn)
 library(lattice)
 
 #read in data cleaned from "clean_data.R" script
 bee_data<-read.csv("data/sandhill_bee.csv")[,-1]%>%
           rename(Sav_prop=Savanna_Prop,Flower_abun=AbundanceAllPl_NoHA,
-          flower_chao=Chao1_NoHA, Fire=NumFires_90,Soil=Average_soil_moisture)%>%
-          select(Region,Site,Plot,flower_chao,Flower_abun,Fire,Soil,Sav_prop,MEM1,Species, Genus, Month,n)
+          Flower_chao=Chao1_NoHA, Fire=NumFires_90,Soil=Average_soil_moisture)%>%
+          select(Region,Site,Plot,Flower_chao,Flower_abun,Fire,Soil,Sav_prop,MEM1,Species, Genus, Month,n)%>%
+          mutate_at(c("Flower_chao","Flower_abun","Fire","Soil","Sav_prop"), ~(scale(.) %>% as.vector))
 
 
 
+
+
+
+
+
+
+dat<-bee_data[,c(4,5,6,7,8)]
+cor(dat)
+is.na(bee_data)
 ####Build Models####
-TMB1 <- glmmTMB(N ~ (1|Species) + BF_2000*Elevation*IN_20.5 + I(Elevation^2) +
-                  (0 + BF_2000|SPP) + 
-                  (0 + Elevation|SPP) + 
-                  (0 + IN_20.5|SPP) + 
-                  (1|Block)+(1|Block:Plot2)+ (1|Block:Plot2:Submodule2), 
-                family = "binomial", 
-                data = veg)
+
+
+#FULL MODEL NO INTERACTIONS
+TMB1 <- glmmTMB(n ~ (1|Species) + Flower_chao*Flower_abun+Fire+Soil+Sav_prop +Month+
+                  (0 + Flower_chao|Species) + 
+                  (0 + Flower_abun|Species) + 
+                  (0 + Fire|Species) + 
+                  (0 + Soil|Species) +
+                  (0 + Sav_prop|Species) + 
+                  #(0 + Month|Species) + 
+                  (1|Site)+ (1|Site:Plot), 
+                  family = "poisson", 
+                  data = bee_data)
+summary(TMB1)
+r.squaredGLMM(TMB1)
+
+simulationOutput <- simulateResiduals(fittedModel = TMB1, plot=F)
+
+hist(residuals(simulationOutput))
+plot(simulationOutput)    
+
+plotResiduals(simulationOutput, form = data$BF)
+plotResiduals(simulationOutput, form = data$Elevation)
+plotResiduals(simulationOutput, form = data$fTime)
+plotResiduals(simulationOutput, form = data$WD)
+
+testDispersion(simulationOutput) #looks good 
+testZeroInflation(simulationOutput)
+
+
+#
+TMB2 <- glmmTMB(n ~ (1|Species) + Flower_chao*Flower_abun+Month+
+                  (0 + Flower_chao|Species) + 
+                  (0 + Flower_abun|Species) + 
+                  #(0 + Month|Species) + 
+                  (1|Site)+ (1|Site:Plot), 
+                family = "poisson", 
+                data = bee_data)
+summary(TMB2)
+r.squaredGLMM(TMB2)
+
